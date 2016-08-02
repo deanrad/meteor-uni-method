@@ -28,6 +28,8 @@ Package.onTest(function(api) {
     api.use('tinytest')
     api.use('ecmascript')
 
+    api.use('practicalmeteor:mocha')
+    api.use('practicalmeteor:chai')
     api.use('deanius:uni-method')
     api.addFiles('uniMethod.test.js')
 })

@@ -101,3 +101,4 @@ const UniMethodObj = {
 
 // Meteor requires this means of exporting
 UniMethod = UniMethodObj // eslint-disable-line no-undef
+export default UniMethodObj
