@@ -1,0 +1,31 @@
+{
+  "name": "meteor-uni-method",
+  "version": "1.0.0",
+  "description": "Improved DDP method invocation over Meteor.call/methods",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/deanius/meteor-uni-method.git"
+  },
+  "keywords": [
+    "meteor",
+    "ddp",
+    "method",
+    "promise"
+  ],
+  "author": "Dean Radcliffe",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/deanius/meteor-uni-method/issues"
+  },
+  "homepage": "https://github.com/deanius/meteor-uni-method#readme",
+  "devDependencies": {
+    "eslint-config-airbnb": "^10.0.0",
+    "eslint-import-resolver-meteor": "^0.3.1",
+    "eslint-plugin-import": "^1.12.0",
+    "eslint-plugin-meteor": "^4.0.0"
+  }
+}
