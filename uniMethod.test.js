@@ -1,10 +1,9 @@
 import { Meteor } from 'meteor/meteor'
 import { expect } from 'meteor/practicalmeteor:chai'
-import UniMethod, { nameUniMethod } from './index'
+import UniMethod from './uniMethod'
 
 let shouldNotBeHere = () => { throw new Error('should not be here') }
 let isBluebird = (promiseInstance) => (!! promiseInstance.constructor.props)
-
 
 describe('UniMethod.methods({})', () => {
     it('Should produce an object whose values are UniMethods', () => {
@@ -34,32 +33,6 @@ describe('UniMethod.define', () => {
     })
 
     describe('The returned function', () => {
-        describe('creating #name from the given name', () => {
-            it('Has the camelized name on #name', () => {
-                expect(subject.name).to.equal('clientServerMethod')
-            })
-            it('should make foo-bar into fooBar', () => {
-                expect(nameUniMethod('foo-bar')).to.equal('fooBar')
-            })
-            it('should make foo_bar into fooBar', () => {
-                expect(nameUniMethod('foo_bar')).to.equal('fooBar')
-            })
-            it('should make foo.bar into fooBar', () => {
-                expect(nameUniMethod('foo.bar')).to.equal('fooBar')
-            })
-            it('should make foobar1 into foobar1', () => {
-                expect(nameUniMethod('foobar1')).to.equal('foobar1')
-            })
-            it('should throw if given a reserved word', () => {
-                expect(nameUniMethod.bind(null, 'function')).to.throw(Error)
-            })
-            it('should be ok with embedded reserved word', () => {
-                expect(nameUniMethod('new-board-eval')).to.equal('newBoardEval')
-            })
-            it('should throw if given punctuation', () => {
-                expect(nameUniMethod.bind(null, ';attack!')).to.throw(Error)
-            })
-        })
         describe('calling it', () => {
             it('should throw if called with > 1 argument', () => {
                 let arg1 = 'arg1'
@@ -84,14 +57,18 @@ describe('UniMethod.define', () => {
         })
         let result = subject('arg1')
 
+        it('runs the same code on the client and server', () => {
+            expect(true).to.equal(true) // hard to demonstrate, but worth documenting w/ a test
+        })
+
         if (Meteor.isClient) {
             it('has a "then" method, and acts as a Promise', () => {
                 expect(result).to.have.property('then')
 
                 return result.then(
-          v => expect(v).to.equal('server/arg1'),
-          shouldNotBeHere
-        )
+                  v => expect(v).to.equal('server/arg1'),
+                  shouldNotBeHere
+                )
             })
 
             it('has a "catch" method, and acts as a Promise', () => {
@@ -107,11 +84,11 @@ describe('UniMethod.define', () => {
             it('contains a Bluebird promise for the real (server) result in  #finalValue', () => {
                 expect(result.finalValue).to.have.property('then')
                 expect(isBluebird(result.finalValue))
-        /* ALWAYS return the promise chain from the test or you'll silence errors! */
+                /* ALWAYS return the promise chain from the test or you'll silence errors! */
                 return result.finalValue.then(
-            v => expect(v).to.equal('server/arg1'),
-            shouldNotBeHere
-        )
+                    v => expect(v).to.equal('server/arg1'),
+                    shouldNotBeHere
+                )
             })
         }
 
@@ -130,9 +107,9 @@ describe('UniMethod.define', () => {
                 expect(result).to.have.property('then')
 
                 return result.then(
-          v => expect(v).to.equal('Real Server Value: arg1'),
-          shouldNotBeHere
-        )
+                  v => expect(v).to.equal('Real Server Value: arg1'),
+                  shouldNotBeHere
+                )
             })
 
             it('has a "catch" method, and acts as Bluebird promise', () => {
@@ -148,11 +125,11 @@ describe('UniMethod.define', () => {
             it('contains a Bluebird promise for the real (server) result in  #finalValue', () => {
                 expect(result.finalValue).to.have.property('then')
                 expect(isBluebird(result.finalValue))
-        /* ALWAYS return the promise chain from the test or you'll silence errors! */
+                /* ALWAYS return the promise chain from the test or you'll silence errors! */
                 return result.finalValue.then(
-            v => expect(v).to.equal('Real Server Value: arg1'),
-            shouldNotBeHere
-        )
+                    v => expect(v).to.equal('Real Server Value: arg1'),
+                    shouldNotBeHere
+                )
             })
         }
 
@@ -164,4 +141,3 @@ describe('UniMethod.define', () => {
         }
     })
 })
-
