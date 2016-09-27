@@ -1,9 +1,7 @@
 /* eslint-disable no-eval, prefer-rest-params */
-import Promise from 'bluebird'
 import { Meteor } from 'meteor/meteor'
 import { _ } from 'meteor/underscore'
 import { ValidatedMethod } from 'meteor/mdg:validated-method'
-
 
 const UniMethodObj = {
     methods(defs) {
@@ -16,7 +14,7 @@ const UniMethodObj = {
         if (_.isFunction(opts)) {
             let fn = opts
             opts = {
-                clientStub: fn,
+                clientMethod: fn,
                 serverMethod: fn
             }
         }
@@ -27,7 +25,7 @@ const UniMethodObj = {
             applyOptions: opts.applyOptions,
             run: function (...args) {
                 if (this.isSimulation) {
-                    return opts.clientStub.apply(this, args)
+                    return opts.clientMethod.apply(this, args)
                 }
                 return opts.serverMethod.apply(this, args)
             }
@@ -37,10 +35,10 @@ const UniMethodObj = {
             // Keep the simple, Fiber-based sync-style API on the server
             if (Meteor.isServer) return mdgMethod.call(arg)
 
-            let clientStubReturn = null
+            let clientMethodReturn = null
 
             let serverReturnPromise = new Promise((resolve, reject) => {
-                clientStubReturn = mdgMethod.call(arg, (err, result) => {
+                clientMethodReturn = mdgMethod.call(arg, (err, result) => {
                     if (err) {
                         reject(err)
                     } else {
@@ -51,7 +49,7 @@ const UniMethodObj = {
             })
 
             return {
-                optimisticValue: clientStubReturn,
+                optimisticValue: clientMethodReturn,
                 finalValue: serverReturnPromise,
                 then: function(success, err) {
                     return this.finalValue.then(success, err)
@@ -73,8 +71,19 @@ const UniMethodObj = {
     }
 }
 
-export default UniMethodObj
+// allow Promise-based calling of DDP methods not defined via UniMethod
+if (Meteor.isClient) {
+    UniMethodObj.call = (name, ...args) =>
+        new Promise((resolve, reject) => {
+            Meteor.call(name, ...args, (err, result) => {
+                if (err) {
+                    reject(err)
+                } else {
+                    resolve(result)
+                }
+                return undefined
+            })
+        })
+}
 
-// Meteor requires this means of exporting
-// eslint-disable-next-line no-undef
-UniMethod = UniMethodObj
+export const UniMethod = UniMethodObj

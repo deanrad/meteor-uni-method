@@ -1,18 +1,20 @@
 import { Meteor } from 'meteor/meteor'
 import { expect } from 'meteor/practicalmeteor:chai'
-import UniMethod from './uniMethod'
+import { UniMethod } from './uniMethod'
 
 let shouldNotBeHere = () => { throw new Error('should not be here') }
-let isBluebird = (promiseInstance) => (!! promiseInstance.constructor.props)
 
 describe('UniMethod.methods({})', () => {
     it('Should produce an object whose values are UniMethods', () => {
+        // server running things twice produces spurious failures
+        if (Meteor.isServer && UniMethod.simple) return
+
         let result = UniMethod.methods({
             simple: (arg) => {
                 return (Meteor.isClient ? 'client' : 'server') + '/' + arg
             },
             clientServer: {
-                clientStub: function(arg) { return 'Client Stub Value: ' + arg },
+                clientMethod: function(arg) { return 'Client Stub Value: ' + arg },
                 serverMethod: function(arg) { return 'Real Server Value: ' + arg }
             }
         })
@@ -24,7 +26,7 @@ describe('UniMethod.methods({})', () => {
 
 describe('UniMethod.define', () => {
     let subject = UniMethod.define('client-server-method', {
-        clientStub: function(arg) { return 'Client Stub Value: ' + arg },
+        clientMethod: function(arg) { return 'Client Stub Value: ' + arg },
         serverMethod: function(arg) { return 'Real Server Value: ' + arg }
     })
 
@@ -77,13 +79,12 @@ describe('UniMethod.define', () => {
                 return result.catch(shouldNotBeHere)
             })
 
-            it('contains the result of the clientStub in #optimisticValue', () => {
+            it('contains the result of the clientMethod in #optimisticValue', () => {
                 expect(result.optimisticValue).to.equal('client/arg1')
             })
 
-            it('contains a Bluebird promise for the real (server) result in  #finalValue', () => {
+            it('contains a promise for the real (server) result in  #finalValue', () => {
                 expect(result.finalValue).to.have.property('then')
-                expect(isBluebird(result.finalValue))
                 /* ALWAYS return the promise chain from the test or you'll silence errors! */
                 return result.finalValue.then(
                     v => expect(v).to.equal('server/arg1'),
@@ -99,11 +100,11 @@ describe('UniMethod.define', () => {
         }
     })
 
-    describe('When defined with name, {clientStub, serverMethod}, calling it', () => {
+    describe('When defined with name, {clientMethod, serverMethod}, calling it', () => {
         if (Meteor.isClient) {
             let result = subject('arg1')
 
-            it('has a "then" method, and acts as Bluebird promise', () => {
+            it('has a "then" method, and acts as a promise', () => {
                 expect(result).to.have.property('then')
 
                 return result.then(
@@ -112,19 +113,18 @@ describe('UniMethod.define', () => {
                 )
             })
 
-            it('has a "catch" method, and acts as Bluebird promise', () => {
+            it('has a "catch" method, and acts as a promise', () => {
                 expect(result).to.have.property('catch')
 
                 return result.catch(shouldNotBeHere)
             })
 
-            it('contains the result of the clientStub in #optimisticValue', () => {
+            it('contains the result of the clientMethod in #optimisticValue', () => {
                 expect(result.optimisticValue).to.equal('Client Stub Value: arg1')
             })
 
-            it('contains a Bluebird promise for the real (server) result in  #finalValue', () => {
+            it('contains a promise for the real (server) result in  #finalValue', () => {
                 expect(result.finalValue).to.have.property('then')
-                expect(isBluebird(result.finalValue))
                 /* ALWAYS return the promise chain from the test or you'll silence errors! */
                 return result.finalValue.then(
                     v => expect(v).to.equal('Real Server Value: arg1'),
@@ -141,3 +141,13 @@ describe('UniMethod.define', () => {
         }
     })
 })
+
+if (Meteor.isClient) {
+    describe('UniMethod.call', () => {
+        it('should return a promise for a Meteor.call', () => {
+            return UniMethod.call('simple', 1).then(
+                v => expect(v).to.equal('server/1'),
+                shouldNotBeHere)
+        })
+    })
+}

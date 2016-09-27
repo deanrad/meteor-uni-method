@@ -1,12 +1,8 @@
 Package.describe({
     name: 'deanius:uni-method',
     summary: 'Improved DDP method invocation over Meteor.call/methods',
-    version: '0.8.0',
+    version: '0.9.0',
     git: 'https://github.com/deanius/meteor-uniMethod'
-})
-
-Npm.depends({
-    'bluebird': '3.4.1'
 })
 
 Package.onUse(function(api) {
@@ -21,7 +17,7 @@ Package.onUse(function(api) {
     api.addFiles('uniMethod.js')
 
     // The variables that become global for users of your package
-    api.export('UniMethod')
+    api.mainModule('uniMethod.js')
 })
 
 Package.onTest(function(api) {
@@ -30,5 +26,7 @@ Package.onTest(function(api) {
     api.use('practicalmeteor:mocha')
     api.use('practicalmeteor:chai')
     api.use('deanius:uni-method')
-    api.addFiles('uniMethod.test.js')
+
+    // XXX tests currently not running in client - despite this explicit line below!
+    api.addFiles('uniMethod.test.js', ['client', 'server'])
 })
