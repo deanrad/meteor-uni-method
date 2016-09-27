@@ -1,8 +1,7 @@
-# deanius:uni-method
-
+# deanius:uni-method [![Build Status](https://img.shields.io/travis/deanius/meteor-uni-method.svg)](https://travis-ci.org/deanius/meteor-uni-method) ![ES 2015](https://img.shields.io/badge/ES-2015-brightgreen.svg) ![twitter link](https://img.shields.io/badge/twitter-@deaniusaur-55acee.svg)
 ## Advantages
 
-* No callbacks. Promises. Bluebird ones, even.
+* No callbacks. Promises.
 * No positional arguments. Named arguments.
 * No magic strings. Callable objects.
 * No `.call`. Just call it as a function
@@ -11,8 +10,19 @@
 
 `meteor add deanius:uni-method`
 
+## Usage:
+
+```
+Posts.update = UniMethod.define('post.update', function({_id, changes})...)
+
+Posts.update({_id: 1, changes: {foo: 'bar'}})
+  .then(result => ...)
+  .catch(err => ...)
+```
+
 ## Overview
-Like mdg:validated-method, but differing in client-side behavior.
+Based on, and similar to [`mdg:validated-method`](https://atmospherejs.com/mdg/validated-method), but differing in client-side behavior.
+
 A function created via UniMethod.define returns a Promise for the
 server value. It can be created with a single function, or with
 an object {clientStub, serverMethod}, in which case the return value
@@ -57,12 +67,12 @@ let methods = UniMethod.methods({
 methods.foo(arg1, arg2)
 ```
 
-Usage:
+# Legacy
+
+You can also call methods that are not defined with UniMethod:
 
 ```
-Apps.update = UniMethod.define('app.update', function({id, fields})...)
-
-Apps.update({id: 1, fields: {foo: 'bar'}})
+UniMethod.call('legacy-ddp', ...args)
   .then(result => ...)
   .catch(err => ...)
 ```
