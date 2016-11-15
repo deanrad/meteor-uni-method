@@ -1,7 +1,7 @@
 Package.describe({
     name: 'deanius:uni-method',
     summary: 'Improved DDP method invocation over Meteor.call/methods',
-    version: '0.9.1',
+    version: '1.0.1',
     git: 'https://github.com/deanius/meteor-uni-method'
 })
 
