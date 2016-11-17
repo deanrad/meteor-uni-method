@@ -63,7 +63,7 @@ const UniMethodObj = {
         // mdgMethod.call, on the server:
         // - uses Fibers to appear to synchronously deliver the value
         function clientSideUniMethod(arg) { // eslint-disable-line no-unused-vars
-            let optimisticValue = opts.clientMethod.call(null, arg)
+            let optimisticValue = opts.clientMethod(arg)
             let serverReturnPromise
 
             // shortcut the server upon a truthy result for these kinds of methods
@@ -71,6 +71,7 @@ const UniMethodObj = {
                 serverReturnPromise = Promise.resolve(optimisticValue)
             } else {
                 serverReturnPromise = new Promise((resolve, reject) => {
+                    // NOTE - mdgMethod.call is NOT normal JS call !!
                     optimisticValue = mdgMethod.call(arg, (err, result) => {
                         if (err) {
                             reject(err)
