@@ -72,6 +72,8 @@ const UniMethodObj = {
             } else {
                 serverReturnPromise = new Promise((resolve, reject) => {
                     // NOTE - mdgMethod.call is NOT normal JS call !!
+                    // XXX mdgMethod.call will run the clientMethod a second time in the case of
+                    // opts.mayBeLocallyFulfilled and non-truthy optimisticValue
                     optimisticValue = mdgMethod.call(arg, (err, result) => {
                         if (err) {
                             reject(err)
