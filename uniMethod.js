@@ -39,8 +39,9 @@ const UniMethodObj = {
             validate: opts.validate || function() {},
             applyOptions: opts.applyOptions,
             run: function (...args) {
+                // do nothing, our uni-method wrapper already gives us this value
                 if (this.isSimulation) {
-                    return opts.clientMethod.apply(this, args)
+                    return
                 }
                 return opts.serverMethod.apply(this, args)
             }
@@ -71,10 +72,7 @@ const UniMethodObj = {
                 serverReturnPromise = Promise.resolve(optimisticValue)
             } else {
                 serverReturnPromise = new Promise((resolve, reject) => {
-                    // NOTE - mdgMethod.call is NOT normal JS call !!
-                    // XXX mdgMethod.call will run the clientMethod a second time in the case of
-                    // opts.mayBeLocallyFulfilled and non-truthy optimisticValue
-                    optimisticValue = mdgMethod.call(arg, (err, result) => {
+                    Meteor.call(ddpName, arg, (err, result) => {
                         if (err) {
                             reject(err)
                         } else {
